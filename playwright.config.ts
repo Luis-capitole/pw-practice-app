@@ -14,7 +14,17 @@ export default defineConfig <TestOptions>({
     toMatchSnapshot: {maxDiffPixels: 50} //npx playwright test --update-snapshots
   },
   retries: 1,
-  reporter: 'html',
+  reporter: [
+    process.env.CI ? ["dot"] : ["list"],
+    [
+      "@argos-ci/playwright/reporter",
+      {
+        // Upload to Argos on CI only.
+        uploadToArgos: !!process.env.CI,
+      },
+    ],
+    ['html']
+  ],
 
   use: {
     globalsQaURL: 'https://www.globalsqa.com/demo-site/draganddrop/',
@@ -22,6 +32,7 @@ export default defineConfig <TestOptions>({
     : process.env.STAGING === '1' ? 'http://localhost:4202/'
     : 'http://localhost:4200/',
     trace: 'on-first-retry',
+    screenshot: "only-on-failure",
     actionTimeout: 20000,
     navigationTimeout: 25000,
     video: {
